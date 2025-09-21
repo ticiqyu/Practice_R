@@ -1,0 +1,60 @@
+#Малов Илья ,КМБО-01-20, вариант 16
+
+library("lmtest")
+library("GGally") 
+library("car")
+
+data = na.omit(swiss)
+
+# модель из практического задания 2:
+model = lm(Examination ~ Fertility + Catholic + Agriculture, data) 
+summary(model) 
+
+# 1. Оценим доверительные интервалы для всех коэффициентов в модели (для p=95%)
+
+#коэф. свободы = 43,всего параметров 4==> df = 43-4 = 39 
+t_critical = qt(0.975, df = 39) 
+
+# Стандартные ошибки коэффициентов (взяты из summary(model)):
+Std_Error_Intercept = 4.10586
+Std_Error_Fertility = 0.06274
+Std_Error_Catholic = 0.01919
+Std_Error_Agriculture = 0.03337
+
+Estimate_Std._Intercept=43.68234
+Estimate_Std._Fertility=-0.24582
+Estimate_Std._Catholic=-0.03953
+Estimate_Std._Agriculture=-0.16431
+
+# Выведем соответствующие доверительные интервалы:[x-at,x+at]
+#x-значение таблицы Estimate(коэф.),a-значение таблицы Std Error в строке элемента x,t(одинаков для всех переменных)-критерий Стьюдента.
+
+print(paste("Доверительный интервал Intercept: [", Estimate_Std._Intercept - t_critical * Std_Error_Intercept, 
+            ",", Estimate_Std._Intercept + t_critical * Std_Error_Intercept, "]"))
+
+print(paste("Доверительный интервал Fertility: [", Estimate_Std._Fertility - t_critical * Std_Error_Fertility, 
+            ",", Estimate_Std._Fertility + t_critical * Std_Error_Fertility, "]"))
+
+print(paste("Доверительный интервал Catholic: [", Estimate_Std._Catholic - t_critical * Std_Error_Catholic, 
+            ",", Estimate_Std._Catholic + t_critical * Std_Error_Catholic, "]"))
+
+print(paste("Доверительный интервал Agriculture: [", Estimate_Std._Agriculture - t_critical * Std_Error_Agriculture, 
+            ",", Estimate_Std._Agriculture + t_critical * Std_Error_Agriculture, "]"))
+
+
+# 2. Вывод о отвержении или невозможности отвергнуть статистическую гипотезу о том, что коэффициент равен 0:
+
+# Доверительный интервал свободного коэффициента: [ 35.3774542590579 , 51.9872257409421 ] ~ [35.3774 , 51.9872]
+# Доверительный интервал Fertility: [ -0.372723628323106 , -0.118916371676894 ] ~ [-0.3727 , -0.1189]
+# Доверительный интервал Catholic: [ -0.0783454387555054 , -0.000714561244494573 ] ~ [-0.0783 , -0.0007]
+# Доверительный интервал Agriculture: [ -0.231807196001627 , -0.0968128039983733 ] ~ [-0.2318 , -0.0968]
+
+# все интервалы не соприкасаются с 0->отвергаем статистическую гипотезу о том что коэффициент может быть = 0
+
+
+# 3. Доверительный интервал для одного прогноза (p = 95%, Fertility = 20, Catholic = 10, Agriculture = 10).
+
+new.data = data.frame(Fertility = 20, Catholic = 10, Agriculture = 10)
+predict(model, new.data, interval = "confidence")
+
+# Доверительный интервал: [30.70748, 42.74746]
